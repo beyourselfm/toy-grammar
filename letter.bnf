@@ -1,13 +1,45 @@
+// lexical grammar
+
+%lex
+
 %%
 
 
-E : E '+' T
-  | T
+\s+ /* 省略 whitespaces */
+
+\d+  return "NUMBER"
+
+
+
+/lex
+
+
+
+// syntactic grammar
+
+// 强制 left-associative 写在越后面 优先级越高
+// %left '+'
+// %left '*'
+
+%%
+
+Exp : AdditiveExp;
+
+AdditiveExp : AdditiveExp '+' MultiplicativeExp
+  | MultiplicativeExp
+  ;
+
+MultiplicativeExp : MultiplicativeExp '*' PrimaryExp
+  | PrimaryExp
   ;
 
 
-T : T '*' F
-  | F
-  ;
+PrimaryExp : NUMBER
+           | parenthesizedExp
+           ;
 
+Literal : NumericLiteral;
 
+NumericLiteral : NUMBER;
+
+parenthesizedExp: '(' Exp ')';
