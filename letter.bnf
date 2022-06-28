@@ -25,21 +25,26 @@
 
 Exp : AdditiveExp;
 
-AdditiveExp : AdditiveExp '+' MultiplicativeExp
+
+AdditiveExp : AdditiveExp '+' MultiplicativeExp { $$ = $1 + $3 }
+  |  AdditiveExp '-' MultiplicativeExp { $$ = $1 - $3 }
   | MultiplicativeExp
   ;
 
-MultiplicativeExp : MultiplicativeExp '*' PrimaryExp
+MultiplicativeExp : MultiplicativeExp '*' PrimaryExp { $$ = $1 * $3 }
+  | MultiplicativeExp '/' PrimaryExp { $$ = $1 / $3 }
   | PrimaryExp
   ;
 
 
-PrimaryExp : NUMBER
+PrimaryExp : Literal
            | parenthesizedExp
            ;
 
 Literal : NumericLiteral;
 
-NumericLiteral : NUMBER;
 
-parenthesizedExp: '(' Exp ')';
+// callback
+NumericLiteral : NUMBER { $$ = Number($1) };
+// $2 -> Exp
+parenthesizedExp: '(' Exp ')' { $$ = $2 };
