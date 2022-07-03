@@ -39,23 +39,23 @@ function BinaryExpression(left,op,right){
 Statement: ExpStatement;
 
 
-ExpStatement : Exp ';' { $$ = {type:'ExpressionStatement', Expression: $1 } } ;
+ExpStatement : Expression ';' { $$ = {type:'ExpressionStatement', Expression: $1 } } ;
 
 
-Exp : AdditiveExp;
+Expression : AdditiveExpression;
 
 
-AdditiveExp : AdditiveExp ADDITIVE_OPERATOR MultiplicativeExp { $$ = BinaryExpression($1, $2, $3) }
-  | MultiplicativeExp
+AdditiveExpression : AdditiveExpression ADDITIVE_OPERATOR MultiplicativeExpression { $$ = BinaryExpression($1, $2, $3) }
+  | MultiplicativeExpression
   ;
 
-MultiplicativeExp : MultiplicativeExp MULTIPLICATIVE_OPERATOR PrimaryExp { $$ = BinaryExpression($1, $2, $3) }
-  | PrimaryExp
+MultiplicativeExpression : MultiplicativeExpression MULTIPLICATIVE_OPERATOR PrimaryExpression { $$ = BinaryExpression($1, $2, $3) }
+  | PrimaryExpression
   ;
 
 
-PrimaryExp : Literal
-          | parenthesizedExp
+PrimaryExpression : Literal
+          | parenthesizedExpression
           ;
 
 Literal : NumericLiteral;
@@ -66,4 +66,4 @@ NumericLiteral : NUMBER { $$ = { type : "NumericLiteral", value:Number($1) } };
 
 
 // $2 -> Exp
-parenthesizedExp: '(' Exp ')' { $$ = $2 };
+parenthesizedExp: '(' Expression ')' { $$ = $2 };
