@@ -8,9 +8,15 @@
 \/\/.*  /* comments */
 \/\*(.|\s)*\*\/   /* multi line comments */
 
+
+\bfn\b  return 'FUNCTION'
+\breturn\b  return 'RETURN'
+
 \s+ /* 省略 whitespaces */
 
 \d+  return "NUMBER"
+\w+  return "IDENTIFIER"
+
 
 [+\-] return "ADDITIVE_OPERATOR"
 
@@ -54,8 +60,35 @@ StatementList : Statement { $$ = [$1] }
 Statement: ExpressionStatement
         | EmptyStatement
         | BlockStatement
+        | FunctionDeclaration
+        | ReturnStatement
         ;
 
+FunctionDeclaration : FUNCTION Identifier '(' OptFormalParameterList ')' BlockStatement
+                    {
+                      $$ = {
+                        type: 'FunctionDeclaration',
+                        name: $2,
+                        params: $4,
+                        body:$6,
+                      }
+                    }
+                    ;
+Identifier : IDENTIFIER { $$ = { type:"Identifier", value: $1 } };
+
+// 入参可以为空 或者一串Identifier
+OptFormalParameterList : FormalParameterList
+                      | {$$ = []}
+                      ;
+
+// 跟StatementList一样
+FormalParameterList : Identifier  {$$ = [$1]}
+                  | FormalParameterList ',' Identifier {$1.push($3); $$ = $1}
+                  ;
+
+ReturnStatement : RETURN OptExpression ';' { $$ = {type:'ReturnStatement', arguments:$2 }} ;
+// Return 和面可以为null或者Expression
+OptExpression : Expression | {$$ = null} ;
 
 
 BlockStatement : '{' OptStatementList '}' {$$ = { type:"BLockStatement",statements: $2 }} ;
@@ -84,6 +117,7 @@ MultiplicativeExpression : MultiplicativeExpression MULTIPLICATIVE_OPERATOR Prim
 
 PrimaryExpression : Literal
           | parenthesizedExpression
+          | Identifier
           ;
 
 Literal : NumericLiteral;

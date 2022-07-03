@@ -17,3 +17,9 @@
   *
 */
 {}
+
+
+// Function
+fn square(x){
+  return x * x;
+}
