@@ -5,6 +5,9 @@
 %%
 
 
+\/\/.*  /* comments */
+\/\*(.|\s)*\*\/   /* multi line comments */
+
 \s+ /* 省略 whitespaces */
 
 \d+  return "NUMBER"
@@ -54,7 +57,13 @@ Statement: ExpressionStatement
         ;
 
 
-BlockStatement : '{' StatementList '}' {$$ = { type:"BLockStatement",statements: $2 }} ;
+
+BlockStatement : '{' OptStatementList '}' {$$ = { type:"BLockStatement",statements: $2 }} ;
+
+OptStatementList: StatementList
+                | {$$ = []} // Empty
+                ;
+
 
 EmptyStatement : ';' { $$ = {type:"EmptyStatement"} } ;
 
