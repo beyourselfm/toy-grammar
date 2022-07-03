@@ -11,12 +11,21 @@
 
 [+\-] return "ADDITIVE_OPERATOR"
 
-[*/] return "MULTIPLICATIVE_OPERATOR"
+[*\/] return "MULTIPLICATIVE_OPERATOR"
 
 
 
 /lex
 
+// Module include
+
+%{
+
+function BinaryExpression(left,op,right){
+  return{ type:'BinaryExpression', op , left,right }
+}
+
+%}
 
 
 // syntactic grammar
@@ -30,11 +39,11 @@
 Exp : AdditiveExp;
 
 
-AdditiveExp : AdditiveExp ADDITIVE_OPERATOR MultiplicativeExp { $$ = { type:'BinaryExpression', op:$2 , left:$1,right:$3 } }
+AdditiveExp : AdditiveExp ADDITIVE_OPERATOR MultiplicativeExp { $$ = BinaryExpression($1, $2, $3) }
   | MultiplicativeExp
   ;
 
-MultiplicativeExp : MultiplicativeExp MULTIPLICATIVE_OPERATOR PrimaryExp { $$ = { type:'BinaryExpression', op:$2 , left:$1,right:$3 } }
+MultiplicativeExp : MultiplicativeExp MULTIPLICATIVE_OPERATOR PrimaryExp { $$ = BinaryExpression($1, $2, $3) }
   | PrimaryExp
   ;
 
@@ -47,12 +56,8 @@ Literal : NumericLiteral;
 
 
 // callback
-NumericLiteral :
-    NUMBER { $$ =
-                  {
-                    type : "NumericLiteral",
-                    value:Number($1)
-                  }
-};
+NumericLiteral : NUMBER { $$ = { type : "NumericLiteral", value:Number($1) } };
+
+
 // $2 -> Exp
 parenthesizedExp: '(' Exp ')' { $$ = $2 };
