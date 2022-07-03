@@ -35,11 +35,23 @@ function BinaryExpression(left,op,right){
 // %left '*'
 
 %%
+// 后面的{}就相当于handler（或者说 拦截器？），做一些处理。
+Program : StatementList { $$ = {type:"Program", body:$1 } } ;
 
-Statement: ExpStatement;
+// StatementList Statement
+// StatementList Statement Statement
+// ....
+// Statement Statement ..........
+
+StatementList : Statement { $$ = [$1] }
+              | StatementList Statement { $1.push($2); $$ = $1  }
+              ;
 
 
-ExpStatement : Expression ';' { $$ = {type:'ExpressionStatement', Expression: $1 } } ;
+Statement: ExpressionStatement;
+
+
+ExpressionStatement : Expression ';' { $$ = {type:'ExpressionStatement', Expression: $1 } } ;
 
 
 Expression : AdditiveExpression;
