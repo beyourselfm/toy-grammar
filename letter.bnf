@@ -36,6 +36,12 @@ function BinaryExpression(left,op,right){
 
 %%
 
+Statement: ExpStatement;
+
+
+ExpStatement : Exp ';' { $$ = {type:'ExpressionStatement', Expression: $1 } } ;
+
+
 Exp : AdditiveExp;
 
 
