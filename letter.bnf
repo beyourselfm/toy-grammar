@@ -48,8 +48,15 @@ StatementList : Statement { $$ = [$1] }
               ;
 
 
-Statement: ExpressionStatement;
+Statement: ExpressionStatement
+        | EmptyStatement
+        | BlockStatement
+        ;
 
+
+BlockStatement : '{' StatementList '}' {$$ = { type:"BLockStatement",statements: $2 }} ;
+
+EmptyStatement : ';' { $$ = {type:"EmptyStatement"} } ;
 
 ExpressionStatement : Expression ';' { $$ = {type:'ExpressionStatement', Expression: $1 } } ;
 
