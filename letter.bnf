@@ -11,18 +11,26 @@
 
 \bfn\b  return 'FUNCTION'
 \breturn\b  return 'RETURN'
+\bif\b  return 'IF'
+\belse\b  return 'ELSE'
+
+\btrue\b return 'TRUE'
+\bfalse\b return 'FALSE'
+\bnull\b return 'NULL'
+
+
+
 
 \s+ /* 省略 whitespaces */
 
 \d+  return "NUMBER"
 \w+  return "IDENTIFIER"
-
+[\=!]\= return 'EQUALITY_OPERATOR'
 
 [+\-] return "ADDITIVE_OPERATOR"
 
 [*\/] return "MULTIPLICATIVE_OPERATOR"
-
-
+[><]\=? return 'RELATIONAL_OPERATOR'
 
 /lex
 
@@ -30,10 +38,16 @@
 
 %{
 
-function BinaryExpression(left,op,right){
-  return{ type:'BinaryExpression', op , left,right }
+function BinaryExpression(left,operator,right){
+  return{ type:'BinaryExpression', operator , left,right }
 }
 
+function Literal(namePrefix,value){
+  return {
+    type:`${namePrefix}Literal`,
+    value
+  }
+}
 %}
 
 
@@ -62,7 +76,12 @@ Statement: ExpressionStatement
         | BlockStatement
         | FunctionDeclaration
         | ReturnStatement
+        | IfStatement
         ;
+
+IfStatement : IF '(' Expression ')' Statement
+            | IF '(' Expression ')' Statement ELSE Statement
+            ;
 
 FunctionDeclaration : FUNCTION Identifier '(' OptFormalParameterList ')' BlockStatement
                     {
@@ -102,8 +121,15 @@ EmptyStatement : ';' { $$ = {type:"EmptyStatement"} } ;
 
 ExpressionStatement : Expression ';' { $$ = {type:'ExpressionStatement', Expression: $1 } } ;
 
+Expression : EqualityExpression;
 
-Expression : AdditiveExpression;
+EqualityExpression : RelationalExpression
+          | EqualityExpression EQUALITY_OPERATOR RelationalExpression {$$ = BinaryExpression($1,$2,$3)}
+          ;
+
+RelationalExpression : AdditiveExpression
+                    | RelationalExpression RELATIONAL_OPERATOR AdditiveExpression {$$ = BinaryExpression($1,$2,$3)}
+                    ;
 
 
 AdditiveExpression : AdditiveExpression ADDITIVE_OPERATOR MultiplicativeExpression { $$ = BinaryExpression($1, $2, $3) }
@@ -120,11 +146,19 @@ PrimaryExpression : Literal
           | Identifier
           ;
 
-Literal : NumericLiteral;
+Literal : NumericLiteral
+        | TrueLiteral
+        | FalseLiteral
+        | NullLiteral
+        ;
+TrueLiteral : TRUE { $$ = Literal('Boolean',true) };
+FalseLiteral : FALSE { $$ = Literal('Boolean',false) };
+NullLiteral : NULL { $$ = Literal('Null',null) };
+
+NumericLiteral : NUMBER { $$ = Literal('Numeric',Number($1))  };
 
 
 // callback
-NumericLiteral : NUMBER { $$ = { type : "NumericLiteral", value:Number($1) } };
 
 
 // $2 -> Exp

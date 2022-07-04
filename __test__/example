@@ -12,14 +12,29 @@
 //   }
 // }
 
-/**
-  * qweqwe
-  *
-*/
-{}
-
 
 // Function
-fn square(x){
-  return x * x;
-}
+// fn square(x){
+//   return x * x;
+// }
+
+// fn bar(){
+//   return ;
+// }
+
+// fn foo(){
+// }
+// fn foo(){
+//   if( x > 10 ){
+//     return 100
+//   }else{
+//     return 10
+//   }
+// }
+
+x > 10;
+x <= 10;
+x == 10;
+true;
+false;
+null;
