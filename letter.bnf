@@ -57,6 +57,10 @@ function Literal(namePrefix,value){
 // %left '+'
 // %left '*'
 
+// ELSE 的优先级高于 THEN
+%nonassoc THEN
+%nonassoc ELSE
+
 %%
 // 后面的{}就相当于handler（或者说 拦截器？），做一些处理。
 Program : StatementList { $$ = {type:"Program", body:$1 } } ;
@@ -79,7 +83,7 @@ Statement: ExpressionStatement
         | IfStatement
         ;
 
-IfStatement : IF '(' Expression ')' Statement
+IfStatement : IF '(' Expression ')' Statement %prec THEN
             | IF '(' Expression ')' Statement ELSE Statement
             ;
 
