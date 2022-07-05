@@ -96,16 +96,18 @@ Statement: ExpressionStatement
         | VariableStatement
         ;
 
-VariableStatement : LET VariableDeclarationList { $$ = {type:"VariableStatement" ,declarations:$2} };
+VariableStatement : LET VariableDeclarationList ';' { $$ = {type:"VariableStatement" ,declarations:$2} };
 
 VariableDeclarationList : VariableDeclaration { $$ = [$1] }
                         | VariableDeclarationList ',' VariableDeclaration { $1.push($3); $$ = $1 }
                         ;
 VariableDeclaration : Identifier OptvariableInitializer  { $$ = {type:"VariableDeclaration", id:$1, init:$2} };
 
-OptvariableInitializer : VariableInitializer | ;
+OptvariableInitializer : VariableInitializer
+                      | {$$ = null}
+                      ;
 
-VariableInitializer : SIMPLE_ASSIGN AssignmentExpreesion {$$ = $2};
+VariableInitializer : SIMPLE_ASSIGN AssignmentExpreesion  {$$ = $2} ;
 
 IfStatement : IF '(' Expression ')' Statement %prec THEN
             | IF '(' Expression ')' Statement ELSE Statement

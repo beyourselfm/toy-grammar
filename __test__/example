@@ -45,10 +45,9 @@
 
 // let a = 10;
 // let b;
-
+a = b;
 let x,y =10;
+let a;
 
 
 
-
-// b = 10;
