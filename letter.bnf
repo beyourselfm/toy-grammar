@@ -17,6 +17,7 @@
 \btrue\b return 'TRUE'
 \bfalse\b return 'FALSE'
 \bnull\b return 'NULL'
+\blet\b return 'LET'
 
 
 
@@ -25,9 +26,15 @@
 
 \d+  return "NUMBER"
 \w+  return "IDENTIFIER"
-[\=!]\= return 'EQUALITY_OPERATOR'
 
+\|\| return 'LOGICAL_OR'
+\&\& return 'LOGICAL_AND'
+
+[\=!]\= return 'EQUALITY_OPERATOR'
 [+\-] return "ADDITIVE_OPERATOR"
+
+\= return 'SIMPLE_ASSIGN'
+[*/+\-]= return 'COMPLEX_ASSIGN'
 
 [*\/] return "MULTIPLICATIVE_OPERATOR"
 [><]\=? return 'RELATIONAL_OPERATOR'
@@ -41,6 +48,11 @@
 function BinaryExpression(left,operator,right){
   return{ type:'BinaryExpression', operator , left,right }
 }
+
+function LogicialExpression(left,operator,right){
+  return{ type:'LogicialExpression', operator , left,right }
+}
+
 
 function Literal(namePrefix,value){
   return {
@@ -81,7 +93,19 @@ Statement: ExpressionStatement
         | FunctionDeclaration
         | ReturnStatement
         | IfStatement
+        | VariableStatement
         ;
+
+VariableStatement : LET VariableDeclarationList { $$ = {type:"VariableStatement" ,declarations:$2} };
+
+VariableDeclarationList : VariableDeclaration { $$ = [$1] }
+                        | VariableDeclarationList ',' VariableDeclaration { $1.push($3); $$ = $1 }
+                        ;
+VariableDeclaration : Identifier OptvariableInitializer  { $$ = {type:"VariableDeclaration", id:$1, init:$2} };
+
+OptvariableInitializer : VariableInitializer | ;
+
+VariableInitializer : SIMPLE_ASSIGN AssignmentExpreesion {$$ = $2};
 
 IfStatement : IF '(' Expression ')' Statement %prec THEN
             | IF '(' Expression ')' Statement ELSE Statement
@@ -97,7 +121,6 @@ FunctionDeclaration : FUNCTION Identifier '(' OptFormalParameterList ')' BlockSt
                       }
                     }
                     ;
-Identifier : IDENTIFIER { $$ = { type:"Identifier", value: $1 } };
 
 // 入参可以为空 或者一串Identifier
 OptFormalParameterList : FormalParameterList
@@ -120,19 +143,30 @@ OptStatementList: StatementList
                 | {$$ = []} // Empty
                 ;
 
+LeftHandSideExpression : Identifier ;
+
 
 EmptyStatement : ';' { $$ = {type:"EmptyStatement"} } ;
 
 ExpressionStatement : Expression ';' { $$ = {type:'ExpressionStatement', Expression: $1 } } ;
 
-Expression : EqualityExpression;
+Expression : AssignmentExpreesion;
+
+AssignmentExpreesion : LogicalORExpression | LeftHandSideExpression AssignmentOperator AssignmentExpreesion { $$ = { type:"AssignmentExpreesion",left:$1,operator:$2,right:$3 }};
+
+AssignmentOperator : SIMPLE_ASSIGN | COMPLEX_ASSIGN ;
+
+LogicalORExpression : LogicalANDExpression | LogicalORExpression LOGICAL_OR LogicalANDExpression { $$ = LogicialExpression($1,$2,$3) };
+
+LogicalANDExpression : EqualityExpression | LogicalANDExpression LOGICAL_AND EqualityExpression { $$ = LogicialExpression($1,$2,$3) };
+
 
 EqualityExpression : RelationalExpression
           | EqualityExpression EQUALITY_OPERATOR RelationalExpression {$$ = BinaryExpression($1,$2,$3)}
           ;
 
 RelationalExpression : AdditiveExpression
-                    | RelationalExpression RELATIONAL_OPERATOR AdditiveExpression {$$ = BinaryExpression($1,$2,$3)}
+                    | RelationalExpression RELATIONAL_OPERATOR AdditiveExpression {$$  = BinaryExpression($1,$2,$3)}
                     ;
 
 
@@ -143,6 +177,8 @@ AdditiveExpression : AdditiveExpression ADDITIVE_OPERATOR MultiplicativeExpressi
 MultiplicativeExpression : MultiplicativeExpression MULTIPLICATIVE_OPERATOR PrimaryExpression { $$ = BinaryExpression($1, $2, $3) }
   | PrimaryExpression
   ;
+
+Identifier : IDENTIFIER { $$ = { type:"Identifier", value: $1 } };
 
 
 PrimaryExpression : Literal
