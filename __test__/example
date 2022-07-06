@@ -12,7 +12,6 @@
 //   }
 // }
 
-
 // Function
 // fn square(x){
 //   return x * x;
@@ -45,17 +44,20 @@
 
 // let a = 10;
 // let b;
-a = b;
-let x,y =10;
-let a;
+// a = b;
+// let x,y =10;
+// let a;
+
+// -10;
+
+// fn a(){
+//   return -10;
+// }
+
+// - x - a();
+// -x + (-10);
 
 
--10;
 
-fn a(){
-  return -10;
+while (i > 0){
 }
-
-- x - a();
--x + (-10);
-

@@ -18,8 +18,9 @@
 \bfalse\b return 'FALSE'
 \bnull\b return 'NULL'
 \blet\b return 'LET'
+\bwhile\b return 'WHILE'
 
-
+\"[^\"]*\" return 'STRING'
 
 
 \s+ /* 省略 whitespaces */
@@ -103,7 +104,11 @@ Statement: ExpressionStatement
         | ReturnStatement
         | IfStatement
         | VariableStatement
+        | IterationStatement
         ;
+
+IterationStatement : WhileStatement ;
+WhileStatement : WHILE '(' Expression ')' Statement {$$ = { type:'WhileStatement',test:$3,body:$5 }};
 
 VariableStatement : LET VariableDeclarationList ';' { $$ = {type:"VariableStatement" ,declarations:$2} };
 
@@ -220,6 +225,7 @@ PrimaryExpression : Literal
           ;
 
 Literal : NumericLiteral
+        | StringLiteral
         | TrueLiteral
         | FalseLiteral
         | NullLiteral
@@ -230,6 +236,7 @@ NullLiteral : NULL { $$ = Literal('Null',null) };
 
 NumericLiteral : NUMBER { $$ = Literal('Numeric',Number($1))  };
 
+StringLiteral : STRING {$$ = Literal('String',$1.slice(1,-1))};
 
 // callback
 
