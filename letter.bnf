@@ -60,6 +60,15 @@ function Literal(namePrefix,value){
     value
   }
 }
+
+function UnaryExpression(operator,argument){
+  return {
+    type:"UnaryExpression",
+    operator,
+    argument
+  }
+}
+
 %}
 
 
@@ -177,8 +186,30 @@ AdditiveExpression : AdditiveExpression ADDITIVE_OPERATOR MultiplicativeExpressi
   ;
 
 MultiplicativeExpression : MultiplicativeExpression MULTIPLICATIVE_OPERATOR PrimaryExpression { $$ = BinaryExpression($1, $2, $3) }
-  | PrimaryExpression
+  | UnaryExpression
   ;
+
+UnaryExpression : PrimaryExpression
+                | CallExpression
+                | ADDITIVE_OPERATOR UnaryExpression {$$ = UnaryExpression($1,$2)}
+                ;
+
+
+CallExpression : Callee Arguments { $$ = { type:"CallExpression",callee: $1,arguments:$2 } };
+
+Callee : LeftHandSideExpression //simple call foo();
+      | CallExpression   // chain call foo()();
+      ;
+
+Arguments : '(' OptArugmentList ')' { $$ = $2 };
+
+OptArugmentList : ArugmentList
+                | {$$ = []}
+                ;
+
+ArugmentList : AssignmentExpreesion {$$ = [$1]}
+            | ArugmentList ',' AssignmentExpreesion {$1.push($3); $$ = $1}
+            ;
 
 Identifier : IDENTIFIER { $$ = { type:"Identifier", value: $1 } };
 
@@ -204,4 +235,4 @@ NumericLiteral : NUMBER { $$ = Literal('Numeric',Number($1))  };
 
 
 // $2 -> Exp
-parenthesizedExp: '(' Expression ')' { $$ = $2 };
+parenthesizedExpression: '(' Expression ')' { $$ = $2 };
